@@ -10,7 +10,9 @@ target_items = {
     "490590": "RISE 미국AI밸류체인"
 }
 
-now = datetime.datetime.now()
+# UTC 시간에 9시간을 더해서 명시적으로 한국 시간(KST)을 구합니다.
+kst_tz = datetime.timezone(datetime.timedelta(hours=9))
+now = datetime.datetime.now(kst_tz)
 current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 log_lines = [f"=== [데이터 수집 시점: {current_time}] ==="]
 
