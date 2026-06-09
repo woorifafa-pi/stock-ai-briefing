@@ -2,31 +2,32 @@ name: Daily Stock Scraper
 
 on:
   schedule:
-    - cron: '0 8 * * 1-5' # 월~금 KST 17:00
+    - cron: '0 8 * * 1-5' # 매주 월~금 KST 17:00
   workflow_dispatch:
 
+# Node 20 경고 메시지 영구 제거
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-permissions:
-  contents: write
 
 jobs:
   run-scraper:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - name: 저장소 코드 내려받기
+      uses: actions/checkout@v4
+
+    - name: 파이썬 3.10 환경 설정
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - run: |
-        python -m pip install --upgrade pip
-        pip install yfinance pandas
-    - run: python collect_close_prices.py
-    - name: txt 파일을 깃허브에 누적 저장
+
+    - name: 필수 라이브러리 설치 (yfinance 및 구글 전송용)
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add 정기_종목종가_모니터링.txt
-        git commit -m "📈 일일 주식 종가 업데이트" || echo "No changes"
-        git push
+        python -m pip install --upgrade pip
+        pip install yfinance pandas requests
+
+    - name: 데이터 수집 및 구글 문서(WebHook)로 전송
+      env:
+        # 깃허브 Secrets에 등록한 구글 문서 URL을 파이썬에 전달
+        DOCS_WEBHOOK_URL: ${{ secrets.DOCS_WEBHOOK_URL }}
+      run: python collect_close_prices.py
