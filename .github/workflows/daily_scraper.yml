@@ -2,10 +2,12 @@ name: Daily Stock Scraper
 
 on:
   schedule:
-    - cron: '0 8 * * 1-5' # 매주 월~금 KST 17:00
+    # 1. 저녁 17:00 KST (17 - 9 = 오후 08:00 UTC)
+    - cron: '0 8 * * *'
+    # 2. 다음날 오전 07:00 KST (7 - 9 = 전날 밤 22:00 UTC)
+    - cron: '0 22 * * *'
   workflow_dispatch:
 
-# Node 20 경고 메시지 영구 제거
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -28,6 +30,5 @@ jobs:
 
     - name: 데이터 수집 및 구글 문서(WebHook)로 전송
       env:
-        # 깃허브 Secrets에 등록한 구글 문서 URL을 파이썬에 전달
         DOCS_WEBHOOK_URL: ${{ secrets.DOCS_WEBHOOK_URL }}
       run: python collect_close_prices.py
