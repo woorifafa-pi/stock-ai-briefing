@@ -12,10 +12,18 @@ target_items = {
     "490590.KS": "RISE 미국AI밸류체인"
 }
 
+# 한국 시간(KST) 계산
 kst_tz = datetime.timezone(datetime.timedelta(hours=9))
 now = datetime.datetime.now(kst_tz)
 current_time = now.strftime("%Y-%m-%d %H:%M:%S")
-log_lines = [f"=== [데이터 수집 시점: {current_time}] ==="]
+
+# [수정 반영] 현재 시간에 따라 오전/오후 수집 타이틀 자동 분류
+if now.hour < 12:
+    run_type = "오전 7시 수집"
+else:
+    run_type = "저녁 5시 수집"
+
+log_lines = [f"=== [{run_type} 시점: {current_time}] ==="]
 
 for ticker, name in target_items.items():
     try:
@@ -48,7 +56,7 @@ if webhook_url:
     try:
         response = requests.post(webhook_url, json=payload)
         if response.status_code == 200:
-            print("✅ 구글 문서에 데이터 전송 완료!")
+            print(f"✅ 구글 문서에 {run_type} 데이터 전송 완료!")
         else:
             print(f"❌ 전송 실패: HTTP {response.status_code}")
     except Exception as e:
